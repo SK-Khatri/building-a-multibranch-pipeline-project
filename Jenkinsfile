@@ -17,7 +17,7 @@ pipeline {
     stage('Checkout'){
       steps{
         // SCM Details
-        git url: 'https://github.com/SK-Khatri/building-a-multibranch-pipeline-project.git', branch: 'main'
+        git url: 'https://github.com/SK-Khatri/building-a-multibranch-pipeline-project.git', branch: 'master'
       }
     }
 
