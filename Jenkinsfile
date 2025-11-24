@@ -37,7 +37,11 @@ pipeline {
           sh 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID' 
           
           // Example deployment command
-          sh 'az webapp deploy --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --src-path target/*.war' 
+          sh '''az webapp deploy \
+                  --resource-group my-web-app-rg \
+                  --name my-jenkins-webapp-001 \
+                  --src-path index.html \
+                  --type static''' 
           sh 'az logout'
         }
       }
