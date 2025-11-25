@@ -33,11 +33,13 @@ pipeline {
                                                clientIdVariable: 'AZURE_CLIENT_ID',
                                                clientSecretVariable: 'AZURE_CLIENT_SECRET',
                                                tenantIdVariable: 'AZURE_TENANT_ID')]){
-          
+
+          sh 'ls -l'
+          sh 'ls -l public/'
           sh 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID' 
           
           // Example deployment for index.html in public
-          sh 'az webapp deploy --resource-group my-web-app-rg --name my-jenkins-webapp-001 --src-path public/index.html --target-path .'
+          sh 'az webapp deploy --resource-group my-web-app-rg --name my-jenkins-webapp-001 --src-path public/ --target-path .'
           sh 'az logout'
         }
       }
