@@ -27,22 +27,34 @@ pipeline {
       }
     }
 
-    stage('Deploy to Azure App Service'){
-      steps{
-        withCredentials([azureServicePrincipal(credentialsId: env.AZURE_CREDENTIAL_ID,
-                                               clientIdVariable: 'AZURE_CLIENT_ID',
-                                               clientSecretVariable: 'AZURE_CLIENT_SECRET',
-                                               tenantIdVariable: 'AZURE_TENANT_ID')]){
-
-          sh 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID' 
-
-          // Create a zip file of the public directory in the workspace root
-          sh 'zip -r deployment.zip public/'
-          
-          // Example deployment for index.html in public
-          sh 'az webapp deploy --resource-group my-web-app-rg --name my-jenkins-webapp-001 --src-path deployment.zip --type zip'
-          sh 'az logout'
+    stage('Zip Artifacts') {
+            steps {
+                sh '''
+                    cd public
+                    zip -r ../webapp.zip . -x "*.git*" "node_modules/*" "*.md"
+                    cd ..
+                '''
+            }
         }
+
+    stage('Deploy to Azure App Service'){
+      steps {
+          withCredentials([[
+              $class: 'AzureServicePrincipal',
+              credentialsId: AZURE_CREDENTIAL_ID,
+              subscriptionIdVariable: 'SUBSCRIPTION_ID',
+              clientIdVariable: 'CLIENT_ID',
+              clientSecretVariable: 'CLIENT_SECRET',
+              tenantIdVariable: 'TENANT_ID'
+          ]]) {
+              sh '''
+                  az login --service-principal -u $CLIENT_ID -p $CLIENT_SECRET --tenant $TENANT_ID
+                  az webapp deployment source config-zip \
+                      --resource-group $RESOURCE_GROUP \
+                      --name $WEBAPP_NAME \
+                      --src webapp.zip
+              '''
+          }
       }
     }
   }
