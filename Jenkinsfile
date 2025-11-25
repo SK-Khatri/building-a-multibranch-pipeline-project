@@ -39,22 +39,19 @@ pipeline {
 
     stage('Deploy to Azure App Service'){
       steps {
-          withCredentials([[
-              $class: 'AzureServicePrincipal',
-              credentialsId: AZURE_CREDENTIAL_ID,
-              subscriptionIdVariable: 'SUBSCRIPTION_ID',
-              clientIdVariable: 'CLIENT_ID',
-              clientSecretVariable: 'CLIENT_SECRET',
-              tenantIdVariable: 'TENANT_ID'
-          ]]) {
+          withCredentials([azureServicePrincipal(credentialsId: AZURE_CREDENTIAL_ID, 
+                                                subscriptionIdVariable: 'SUBSCRIPTION_ID',
+                                                clientIdVariable: 'CLIENT_ID', 
+                                                clientSecretVariable: 'CLIENT_SECRET', 
+                                                tenantIdVariable: 'TENANT_ID')]) {
               sh '''
                   az login --service-principal -u $CLIENT_ID -p $CLIENT_SECRET --tenant $TENANT_ID
                   az webapp deployment source config-zip \
                       --resource-group $RESOURCE_GROUP \
                       --name $WEBAPP_NAME \
                       --src webapp.zip
-              '''
-          }
+             '''
+         }
       }
     }
   }
